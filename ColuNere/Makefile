@@ -1,12 +1,12 @@
-HEADER_DIR = headers/
+HEADER_DIR = include/
 SOURCE_DIR = src/
 
 CC = gcc
 CFLAGS = -Wall -Wextra -g --pedantic -I $(HEADER_DIR)
 
-EXEC = railnere
-MAIN = railnere.c
-OBJS = 
+EXEC = colunere
+MAIN = main.c
+OBJS = columnarTransposition.o vigenere.o
 
 all: $(EXEC) clean
 
