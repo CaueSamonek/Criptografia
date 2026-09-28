@@ -1,7 +1,7 @@
 #ifndef VIGENERE_H
 #define VIGENERE_H
 
-// Aplica o deslocamento Vigenere: dir = 1 encrypt, dir = -1 decrypt
+// aplica o deslocamento Vigenere: dir = 1 encrypt, dir = -1 decrypt
 char* vg_apply(char* txt, char* key, int dir);
 
 // wrappers

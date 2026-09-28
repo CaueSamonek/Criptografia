@@ -21,3 +21,4 @@ clean:
 
 purge: clean
 	rm -f $(EXEC)
+	rm -fr __pycache__/

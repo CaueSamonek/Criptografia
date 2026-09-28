@@ -2,80 +2,85 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-#include "columnarTransposition.h" // "ct_" functions
-#include "vigenere.h"              // "vg_" functions
+#include "columnarTransposition.h"
+#include "vigenere.h"
 
-int main(int argc, char **argv)
-{
-    char flag = 0;
-    int ct_cols = 0;
-    char *vg_key = NULL;
-    char *txt_file = NULL;
-    int opt;
+// le todo o arquivo para a memoria
+static char *read_file(const char *path) {
+    FILE *file = fopen(path, "rb");
+    if (!file) return NULL;
 
-    char *out = NULL;
-    while ((opt = getopt(argc, argv, "edc:k:f:")) != -1)
-    {
-        switch (opt)
-        {
+    fseek(file, 0, SEEK_END);
+    long size = ftell(file);
+    rewind(file);
+
+    char *text = malloc(size + 1);
+    if (!text) {
+        fclose(file);
+        return NULL;
+    }
+
+    fread(text, 1, size, file);
+    fclose(file);
+    text[size] = '\0';
+    return text;
+}
+
+int main(int argc, char **argv) {
+    char operation = 0;
+    int columns = 0;
+    char *key = NULL;
+    char *filename = NULL;
+    int option;
+
+    // le a operacao, as colunas, a chave e o arquivo
+    while ((option = getopt(argc, argv, "edc:k:f:")) != -1) {
+        switch (option) {
         case 'e':
         case 'd':
-            flag = opt;
+            operation = option;
             break;
-
         case 'c':
-            ct_cols = atoi(optarg);
+            columns = atoi(optarg);
             break;
-
         case 'k':
-            vg_key = optarg;
+            key = optarg;
             break;
-
         case 'f':
-            txt_file = optarg;
+            filename = optarg;
             break;
-
         default:
-            printf("Uso: %s -e|-d -c <cols> -k <key> -f <file>\n", argv[0]);
-            return -1;
+            return 1;
         }
     }
 
-    if (!flag)
-    {
-        printf("Uma Flag Deve Ser Especificada: '-e' (encrypt) ou '-d' (decrypt)\n");
-        return -1;
+    if (!operation || columns <= 0 || !key || !filename) {
+        fprintf(stderr, "Uso: %s -e|-d -c <colunas> -k <chave> -f <arquivo>\n", argv[0]);
+        return 1;
     }
 
-    if (!ct_cols || ct_cols <= 0)
-    {
-        printf("O Número de Colunas Deve Ser Positivo e Especificado com '-c'.\n");
-        return -1;
+    char *input = read_file(filename);
+    if (!input) {
+        fprintf(stderr, "Nao foi possivel ler %s\n", filename);
+        return 1;
     }
 
-    if (!vg_key)
-    {
-        printf("A Chave Vigenere Deve Ser Especificada com '-k'.\n");
-        return -1;
+    char *intermediate;
+    char *output;
+
+    // aplica as duas cifras na ordem correta
+    if (operation == 'e') {
+        intermediate = ct_encrypt(input, columns);
+        output = vg_encrypt(intermediate, key);
+    } else {
+        intermediate = vg_decrypt(input, key);
+        output = ct_decrypt(intermediate, columns);
     }
 
-    if (!txt_file)
-    {
-        printf("Um Arquivo Deve Ser Especificado com '-f'.\n");
-        return -1;
-    }
-
-    if (flag == 'e')
-    {
-        out = vg_encrypt(ct_encrypt(txt_file, ct_cols), vg_key);
-        printf("%s", out);
-    }
-
-    else if (flag == 'd')
-    {
-        out = ct_decrypt(vg_decrypt(txt_file, vg_key), ct_cols);
-        printf("%s", out);
-    }
-
+    // envia o resultado para a saida padrao
+    printf("%s", output);
+    free(input);
+    free(intermediate);
+    free(output);
     return 0;
 }

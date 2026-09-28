@@ -3,7 +3,7 @@
 
 #include "vigenere.h"
 
-// Aplica o deslocamento Vigenere: dir = 1 encrypt, dir = -1 decrypt
+// desloca somente letras e preserva os outros caracteres
 char* vg_apply(char* txt, char* key, int dir){
     int len = strlen(txt);
     int key_len = strlen(key);
@@ -22,10 +22,18 @@ char* vg_apply(char* txt, char* key, int dir){
 
         if ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z')){
             int base = (c >= 'a') ? 'a' : 'A';
-            int shift = (key[k] | 32) - 'a';
+            unsigned char key_char = (unsigned char)key[k];
+            int shift;
 
+            // converte o byte da chave em um deslocamento de 0 a 25
+            if ((key_char >= 'A' && key_char <= 'Z') ||
+                (key_char >= 'a' && key_char <= 'z'))
+                shift = (key_char | 32) - 'a';
+            else
+                shift = key_char % 26;
+
+            // matriz de vigenere feita como linha+coluna=valor
             out[i] = base + (c - base + dir * shift + 26) % 26;
-
             if (++k == key_len)
                 k = 0;
         }

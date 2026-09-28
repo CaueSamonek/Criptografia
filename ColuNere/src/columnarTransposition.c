@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-// Adiciona padding pro tamanho ser multiplo de cols
+// completa o texto para formar uma matriz inteira
 char* ct_addPadding(const char* txt, int cols){
     int len = strlen(txt);
     int rows = (len + cols - 1) / cols;
@@ -18,6 +18,7 @@ char* ct_addPadding(const char* txt, int cols){
     return out;
 }
 
+// transpoe a matriz em blocos para aproveitar melhor a memoria cache
 char* ct_transpose(const char* txt, int rows, int cols){
     int len = rows * cols;
     char* out = malloc(len + 1);
@@ -32,7 +33,7 @@ char* ct_transpose(const char* txt, int rows, int cols){
     return out;
 }
 
-// Escreve em linhas e le em colunas
+// escreve em linhas e le em colunas
 char* ct_encrypt(const char* txt, int cols){
     char* in = ct_addPadding(txt, cols);
 
@@ -43,13 +44,13 @@ char* ct_encrypt(const char* txt, int cols){
     return out;
 }
 
-// Escreve em colunas e le em linhas
+// escreve em colunas e le em linhas
 char* ct_decrypt(const char* txt, int cols){
     int len = strlen(txt);
     int rows = len / cols;
     char* out = ct_transpose(txt, cols, rows);
 
-    // Remove padding
+    // remove o preenchimento adicionado na cifra
     while (len > 0 && out[len - 1] == CT_PAD)
         len--;
 
